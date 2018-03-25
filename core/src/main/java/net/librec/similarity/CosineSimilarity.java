@@ -40,9 +40,12 @@ public class CosineSimilarity extends AbstractRecommenderSimilarity {
 
         double innerProduct = 0.0, thisPower2 = 0.0, thatPower2 = 0.0;
         for (int i = 0; i < thisList.size(); i++) {
-            innerProduct += thisList.get(i).doubleValue() * thatList.get(i).doubleValue();
-            thisPower2 += thisList.get(i).doubleValue() * thisList.get(i).doubleValue();
-            thatPower2 += thatList.get(i).doubleValue() * thatList.get(i).doubleValue();
+            double thisValue = thisList.get(i).doubleValue();
+            double thatValue = thatList.get(i).doubleValue();
+
+            innerProduct += thisValue * thatValue;
+            thisPower2 += thisValue * thisValue;
+            thatPower2 += thatValue * thatValue;
         }
         return innerProduct / Math.sqrt(thisPower2 * thatPower2);
     }

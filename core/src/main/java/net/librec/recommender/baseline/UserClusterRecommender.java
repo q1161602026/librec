@@ -96,14 +96,14 @@ public class UserClusterRecommender extends ProbabilisticGraphicalRecommender {
 
             BigDecimal[] sum_uk = new BigDecimal[numTopics];
             for (int k = 0; k < numTopics; k++) {
-                BigDecimal userTopicProb = new BigDecimal(topicInitialProbs.get(k));
+                BigDecimal userTopicProb = new BigDecimal(topicInitialProbs.get(k)); // Pi
 
                 for (VectorEntry ve : ru) {
                     double rui = ve.get();
                     int r = ratingScale.indexOf(rui);
-                    BigDecimal topicRatingProb = new BigDecimal(topicRatingProbs.get(k, r));
+                    BigDecimal topicRatingProb = new BigDecimal(topicRatingProbs.get(k, r)); // Pkr
 
-                    userTopicProb = userTopicProb.multiply(topicRatingProb);
+                    userTopicProb = userTopicProb.multiply(topicRatingProb);  // Pi * Pkr
                 }
 
                 sum_uk[k] = userTopicProb;
@@ -112,7 +112,7 @@ public class UserClusterRecommender extends ProbabilisticGraphicalRecommender {
 
             for (int k = 0; k < numTopics; k++) {
                 double zuk = sum_uk[k].divide(sum_u, 6, RoundingMode.HALF_UP).doubleValue();
-                userTopicProbs.set(u, k, zuk);
+                userTopicProbs.set(u, k, zuk); // Gamma_(u,k)
             }
         }
 
@@ -121,32 +121,30 @@ public class UserClusterRecommender extends ProbabilisticGraphicalRecommender {
     @Override
     protected void mStep() {
         double[] sum_uk = new double[numTopics];
-        double sum = 0;
 
         for (int k = 0; k < numTopics; k++) {
             for (int r = 0; r < numRatingLevels; r++) {
                 double numerator = 0.0, denorminator = 0.0;
 
                 for (int u = 0; u < numUsers; u++) {
-                    double ruk = userTopicProbs.get(u, k);
+                    double ruk = userTopicProbs.get(u, k);  // Gamma_(u,k)
                     numerator += ruk * userNumEachRating.get(u, r);
                     denorminator += ruk * userNumRatings.get(u);
                 }
-                topicRatingProbs.set(k, r, numerator / denorminator);
+                topicRatingProbs.set(k, r, numerator / denorminator);  // Pkr
             }
 
             double sum_u = 0;
             for (int u = 0; u < numUsers; u++) {
-                double ruk = userTopicProbs.get(u, k);
+                double ruk = userTopicProbs.get(u, k); //  Gamma_(u,k)
                 sum_u += ruk;
             }
 
             sum_uk[k] = sum_u;
-            sum += sum_u;
         }
 
         for (int k = 0; k < numTopics; k++) {
-            topicInitialProbs.set(k, sum_uk[k] / sum);
+            topicInitialProbs.set(k, sum_uk[k] / numUsers);  // Pi
         }
 
     }

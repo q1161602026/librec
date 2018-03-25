@@ -16,17 +16,17 @@ public class KernelSmoothing {
 
     public static double kernelize(double sim, double width, int kernelType) {
         double dist = 1.0 - sim;
-
-        if (kernelType == TRIANGULAR_KERNEL) { // Triangular kernel
-            return Math.max(1 - dist / width, 0);
-        } else if (kernelType == UNIFORM_KERNEL) {
-            return dist < width ? 1 : 0;
-        } else if (kernelType == EPANECHNIKOV_KERNEL) {
-            return Math.max(3.0 / 4.0 * (1 - Math.pow(dist / width, 2)), 0);
-        } else if (kernelType == GAUSSIAN_KERNEL) {
-            return 1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * Math.pow(dist / width, 2));
-        } else { // Default: Triangular kernel
-            return Math.max(1 - dist / width, 0);
+        switch (kernelType) {
+            case TRIANGULAR_KERNEL:
+                return Math.max(1 - dist / width, 0);
+            case UNIFORM_KERNEL:
+                return dist < width ? 1 : 0;
+            case EPANECHNIKOV_KERNEL:
+                return Math.max(3.0 / 4.0 * (1 - Math.pow(dist / width, 2)), 0);
+            case GAUSSIAN_KERNEL:
+                return 1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * Math.pow(dist / width, 2));
+            default:
+                return Math.max(1 - dist / width, 0);
         }
     }
 }

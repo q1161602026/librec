@@ -62,7 +62,7 @@ public abstract class AbstractRecommenderSimilarity implements RecommenderSimila
             } else {
                 // calculate the similarity between users, or the similarity between
                 // items.
-                boolean isUser = StringUtils.equals(similarityKey, "user") ? true : false;
+                boolean isUser = StringUtils.equals(similarityKey, "user");
                 SparseMatrix trainMatrix = dataModel.getDataSplitter().getTrainData();
                 int numUsers = trainMatrix.numRows();
                 int numItems = trainMatrix.numColumns();
