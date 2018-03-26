@@ -156,7 +156,7 @@ public class AspectModelRecommender extends ProbabilisticGraphicalRecommender {
             Map<Integer, Double> QTopicProbs = Q.get(u, i);
             for (int z = 0; z < numTopics; z++) {
                 double prob = (denominator > 0 ? numerator[z] / denominator : 0.0d);
-                QTopicProbs.put(z, prob);
+                QTopicProbs.put(z, prob); // P(z|u,i,r)
             }
         }
     }
@@ -183,12 +183,12 @@ public class AspectModelRecommender extends ProbabilisticGraphicalRecommender {
             }
 
             topicProbsSum.add(z, smallValue);
-            topicProbs.set(z, topicProbsSum.get(z) / numRates);
+            topicProbs.set(z, topicProbsSum.get(z) / numRates); // P(z)
             for (int u = 0; u < numUsers; u++) {
-                topicUserProbs.set(z, u, topicUserProbsSum.get(z, u) / topicProbsSum.get(z));
+                topicUserProbs.set(z, u, topicUserProbsSum.get(z, u) / topicProbsSum.get(z)); // P(u|z)
             }
             for (int i = 0; i < numItems; i++) {
-                topicItemProbs.set(z, i, topicItemProbsSum.get(z, i) / topicProbsSum.get(z));
+                topicItemProbs.set(z, i, topicItemProbsSum.get(z, i) / topicProbsSum.get(z)); // P(i|z)
             }
             double mean = topicProbsMeanSum.get(z) / topicProbsSum.get(z);
             for (MatrixEntry me : trainMatrix) {
@@ -198,8 +198,8 @@ public class AspectModelRecommender extends ProbabilisticGraphicalRecommender {
                 double val = Q.get(u, i).get(z);
                 topicProbsVarianceSum.add(z, (r - mean) * (r - mean) * val);
             }
-            topicProbsMean.set(z, mean);
-            topicProbsVariance.set(z, (topicProbsVarianceSum.get(z) + smallValue) / topicProbsSum.get(z));
+            topicProbsMean.set(z, mean); // μk
+            topicProbsVariance.set(z, (topicProbsVarianceSum.get(z) + smallValue) / topicProbsSum.get(z)); // σk
         }
     }
 
