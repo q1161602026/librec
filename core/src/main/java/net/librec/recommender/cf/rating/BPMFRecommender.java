@@ -93,8 +93,6 @@ public class BPMFRecommender extends MatrixFactorizationRecommender {
             userWishartScale.set(i, i, userWishartScale0);
             itemWishartScale.set(i, i, itemWishartScale0);
         }
-        userWishartScale.inv();
-        itemWishartScale.inv();
 
         userWishartNu = numFactors;
         itemWishartNu = numFactors;
@@ -190,17 +188,17 @@ public class BPMFRecommender extends MatrixFactorizationRecommender {
         DenseMatrix populationVariance = factors.cov();
 
         double betaPost = normalBeta0 + numRows;
-        double nuPost = WishartNu0 + 1.0;
+        double nuPost = WishartNu0 + numRows;
         DenseVector muPost = normalMu0.scale(normalBeta0).add(mean.scale(numRows)).scale(1.0 / betaPost);
 
         DenseMatrix WishartScalePost = WishartScale0.add(populationVariance.scale(numRows));
-        DenseVector muError = normalMu0.minus(mean);
+        DenseVector muError = normalMu0.minus(mean); // (μ0 - U_mean)
         WishartScalePost = WishartScalePost.add(muError.outer(muError).scale(normalBeta0 * numRows / betaPost));
         WishartScalePost = WishartScalePost.inv();
         WishartScalePost = WishartScalePost.add(WishartScalePost.transpose()).scale(0.5);
-        DenseMatrix variance = Randoms.wishart(WishartScalePost, numRows + numColumns);
+        DenseMatrix variance = Randoms.wishart(WishartScalePost, nuPost);
         if (variance != null) {
-            hyperParameters.variance = variance;
+            hyperParameters.variance = variance; // ΛU
         }
 
         DenseMatrix normalVariance = hyperParameters.variance.scale(normalBeta0).inv().cholesky();
@@ -211,7 +209,7 @@ public class BPMFRecommender extends MatrixFactorizationRecommender {
             for (int f = 0; f < numFactors; f++)
                 normalRdn.set(f, Randoms.gaussian(0, 1));
 
-            hyperParameters.mu = normalVariance.mult(normalRdn).add(muPost);
+            hyperParameters.mu = normalVariance.mult(normalRdn).add(muPost); // μU
         }
         return hyperParameters;
     }
@@ -228,10 +226,10 @@ public class BPMFRecommender extends MatrixFactorizationRecommender {
             index++;
         }
 
-        DenseMatrix covar = hyperParameters.variance.add((XX.transpose().mult(XX)).scale(ratingSigma)).inv();
+        DenseMatrix covar = hyperParameters.variance.add((XX.transpose().mult(XX)).scale(ratingSigma)).inv(); // (12)
         DenseVector mu = XX.transpose().mult(ratingsReg).scale(ratingSigma);
         mu.addEqual(hyperParameters.variance.mult(hyperParameters.mu));
-        mu = covar.mult(mu);
+        mu = covar.mult(mu); // (13)
 
         DenseVector factorVector = new DenseVector(numFactors);
 
