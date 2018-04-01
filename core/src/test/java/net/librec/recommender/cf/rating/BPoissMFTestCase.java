@@ -21,6 +21,7 @@ import net.librec.BaseTestCase;
 import net.librec.common.LibrecException;
 import net.librec.conf.Configuration.Resource;
 import net.librec.job.RecommenderJob;
+import net.librec.recommender.cf.ranking.BPoissMFRecommender;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +29,7 @@ import java.io.IOException;
 
 /**
  * BPoissMF Test Case corresponds to BPoissMFRecommender
- * {@link net.librec.recommender.cf.rating.BPoissMFRecommender}
+ * {@link BPoissMFRecommender}
  *
  * @author liuxz
  */
