@@ -55,56 +55,56 @@ public class FMSGDRecommender extends FactorizationMachineRecommender {
     }
 
     private void buildRatingModel() throws LibrecException {
+        int userDimension = trainTensor.getUserDimension();
+        int itemDimension = trainTensor.getItemDimension();
+
         for (int iter = 0; iter < numIterations; iter++) {
             lastLoss = loss;
             loss = 0.0;
-
-            int userDimension = trainTensor.getUserDimension();
-            int itemDimension = trainTensor.getItemDimension();
             for (TensorEntry me : trainTensor) {
                 int[] entryKeys = me.keys();
-                SparseVector vector = tenserKeysToFeatureVector(entryKeys);
+                SparseVector x = tenserKeysToFeatureVector(entryKeys);
 
                 double rate = me.get();
-                double pred = predict(entryKeys[userDimension], entryKeys[itemDimension], vector);
+                double pred = predict(entryKeys[userDimension], entryKeys[itemDimension], x);
 
                 double err = pred - rate;
                 loss += err * err;
-                double gradLoss = err;
 
                 // global bias
                 loss += regW0 * w0 * w0;
 
                 double hW0 = 1;
-                double gradW0 = gradLoss * hW0 + regW0 * w0;
+                double gradW0 = err * hW0 + regW0 * w0;
 
                 // update w0
                 w0 += -learnRate * gradW0;
 
                 // 1-way interactions
-                for(VectorEntry ve: vector){
-                    int l = ve.index();
-                   double oldWl = W.get(l);
-                    double hWl = ve.get();
-                    double gradWl = gradLoss * hWl + regW * oldWl;
-                    W.add(l, -learnRate * gradWl);
+                for(VectorEntry ve: x){
+                    int i = ve.index();
+                    double oldWi = W.get(i);
+                    double xi = ve.get();
+                    double gradWl = err * xi + regW * oldWi;
+                    W.add(i, -learnRate * gradWl);
 
-                    loss += regW * oldWl * oldWl;
+                    loss += regW * oldWi * oldWi;
 
                     // 2-way interactions
                     for (int f = 0; f < k; f++) {
-                        double oldVlf = V.get(l, f);
-                        double hVlf = 0;
-                        double xl =ve.get();
-                        for(VectorEntry ve2: vector){
+                        double oldVlf = V.get(i, f);
+                        double hVif = 0;
+                        for(VectorEntry ve2: x){
                             int j = ve2.index();
-                            if(j!=l){
-                                hVlf += xl * V.get(j, f) * ve2.get();
+                            double xj = ve2.get();
+
+                            if(j!=i){
+                                hVif += xi * V.get(j, f) * xj;
                             }
                         }
 
-                        double gradVlf = gradLoss * hVlf + regF * oldVlf;
-                        V.add(l, f, -learnRate * gradVlf);
+                        double gradVlf = err * hVif + regF * oldVlf;
+                        V.add(i, f, -learnRate * gradVlf);
                         loss += regF * oldVlf * oldVlf;
                     }
                 }

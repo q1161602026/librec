@@ -158,9 +158,8 @@ public class FMALSRecommender extends FactorizationMachineRecommender {
                     VectorEntry vectorEntry = rowIter.next();
                     int i = vectorEntry.index();
 
-                    double oldErr = errors.get(i);
-                    double newErr = oldErr + (oldWl - newWl) * vectorEntry.get();
-                    errors.set(i, newErr);
+                    double addErr = (oldWl - newWl) * vectorEntry.get();
+                    errors.add(i, addErr);
 
                 }
 

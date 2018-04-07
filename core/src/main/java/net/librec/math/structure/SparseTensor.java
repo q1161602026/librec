@@ -45,6 +45,20 @@ public class SparseTensor implements DataSet, Iterable<TensorEntry>, Serializabl
 
     private static final long serialVersionUID = 2487513413901432943L;
 
+
+    public int numDimensions; // number of dimensions, i.e., the order (or modes, ways) of a tensor
+    public int[] dimensions;
+    public List<Integer>[] ndKeys; // n-dimensional array
+    public List<Double> values; // values
+
+    private Multimap<Integer, Integer>[] keyIndices; // each multimap = {key, {pos1, pos2, ...}}
+    private List<Integer> indexedDimensions; // indexed dimensions
+    private Set<Integer> indexedDimensionsSet;// indexed dimensionsSet
+
+
+    // dimensions of users and items
+    private int userDimension, itemDimension;
+
     private class TensorIterator implements Iterator<TensorEntry> {
 
         private int index = 0;
@@ -73,8 +87,8 @@ public class SparseTensor implements DataSet, Iterable<TensorEntry>, Serializabl
             return this;
         }
 
-        public int key(int d) {
-            return ndKeys[d].get(index);
+        public int key(int dim) {
+            return ndKeys[dim].get(index);
         }
 
         public double get() {
@@ -112,30 +126,13 @@ public class SparseTensor implements DataSet, Iterable<TensorEntry>, Serializabl
 
         public int[] keys() {
             int[] res = new int[numDimensions];
-            for (int d = 0; d < numDimensions; d++) {
-                res[d] = key(d);
+            for (int dim = 0; dim < numDimensions; dim++) {
+                res[dim] = key(dim);
             }
-
             return res;
         }
 
     }
-
-    /**
-     * number of dimensions, i.e., the order (or modes, ways) of a tensor
-     */
-    public int numDimensions;
-    public int[] dimensions;
-    public List<Integer>[] ndKeys; // n-dimensional array
-    public List<Double> values; // values
-
-    private Multimap<Integer, Integer>[] keyIndices; // each multimap = {key, {pos1, pos2, ...}}
-    private List<Integer> indexedDimensions; // indexed dimensions
-    private Set<Integer> indexedDimensionsSet;// indexed dimensionsSet
-
-
-    // dimensions of users and items
-    private int userDimension, itemDimension;
 
     /**
      * Construct an empty sparse tensor

@@ -174,8 +174,8 @@ public class BPoissMFRecommender extends MatrixFactorizationRecommender {
 
         }
 
-        userTheta.getValue();
-        itemBeta.getValue();
+        userTheta.samplingParameters();
+        itemBeta.samplingParameters();
 
     }
 
@@ -216,7 +216,7 @@ public class BPoissMFRecommender extends MatrixFactorizationRecommender {
             }
         }
 
-        void getValue() {
+        void samplingParameters() {
             for (int i = 0; i < numRows; i++) {
                 for (int j = 0; j < numColumns; j++) {
                     double p = Randoms.gamma(shape.get(i, j), rate.get(i, j));

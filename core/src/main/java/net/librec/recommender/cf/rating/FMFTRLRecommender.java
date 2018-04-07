@@ -87,11 +87,9 @@ public class FMFTRLRecommender extends FactorizationMachineRecommender {
                 loss += err * err;
 
                 // loss gradient, loss = 1/2 * (yhat - y)^2
-                double gradLoss = err;
 
                 // compute w0 gradient
-                double hW0 = 1;
-                gW0 = gradLoss * hW0;
+                gW0 = err;
                 thetaW0 = 1 / alpha * (Math.sqrt(nW0 + Math.pow(gW0, 2)) - Math.sqrt(nW0));
                 zW0 += gW0 - thetaW0 * w0;
                 nW0 += Math.pow(gW0, 2);
@@ -104,20 +102,20 @@ public class FMFTRLRecommender extends FactorizationMachineRecommender {
                 }
 
                 for(VectorEntry ve: x){
-                    int l = ve.index();
+                    int i = ve.index();
                     // compute W gradient
-                    double hWl = ve.get();
-                    gW.set(l, gradLoss * hWl);
-                    thetaW.set(l, 1 / alpha * (Math.sqrt(nW.get(l) + Math.pow(gW.get(l), 2)) - Math.sqrt(nW.get(l))));
-                    zW.add(l, gW.get(l) - thetaW.get(l) * W.get(l));
-                    nW.add(l, Math.pow(gW.get(l), 2));
+                    double xi = ve.get();
+                    gW.set(i, err * xi);
+                    thetaW.set(i, 1 / alpha * (Math.sqrt(nW.get(i) + Math.pow(gW.get(i), 2)) - Math.sqrt(nW.get(i))));
+                    zW.add(i, gW.get(i) - thetaW.get(i) * W.get(i));
+                    nW.add(i, Math.pow(gW.get(i), 2));
 
                     // update W
-                    if (Math.abs(zW.get(l)) <= lambda1) {
-                        W.set(l, 0);
+                    if (Math.abs(zW.get(i)) <= lambda1) {
+                        W.set(i, 0);
                     } else {
-                        double value = -1 / ((beta + Math.sqrt(nW.get(l))) / alpha + lambda2) * (zW.get(l) - sgn(zW.get(l)) * lambda1);
-                        W.set(l, value);
+                        double value = -1 / ((beta + Math.sqrt(nW.get(i))) / alpha + lambda2) * (zW.get(i) - sgn(zW.get(i)) * lambda1);
+                        W.set(i, value);
                     }
 
                     for (int f = 0; f < k; ++f) {
@@ -125,25 +123,25 @@ public class FMFTRLRecommender extends FactorizationMachineRecommender {
                         double xl =ve.get();
                         for(VectorEntry ve2: x){
                             int j = ve2.index();
-                            if(j!=l){
+                            if(j!=i){
                                 hVlf += xl * V.get(j, f) * ve2.get();
                             }
                         }
 
                         // compute V gradient
-                        double gradVlf = gradLoss * hVlf;
+                        double gradVlf = err * hVlf;
 
-                        gV.set(l, f, gradVlf);
-                        thetaV.set(l, f, 1 / alpha * (Math.sqrt(nV.get(l, f) + Math.pow(gV.get(l, f), 2)) - Math.sqrt(nV.get(l, f))));
-                        zV.add(l, f, gV.get(l, f) - thetaV.get(l, f) * V.get(l, f));
-                        nV.add(l, f, Math.pow(gV.get(l, f), 2));
+                        gV.set(i, f, gradVlf);
+                        thetaV.set(i, f, 1 / alpha * (Math.sqrt(nV.get(i, f) + Math.pow(gV.get(i, f), 2)) - Math.sqrt(nV.get(i, f))));
+                        zV.add(i, f, gV.get(i, f) - thetaV.get(i, f) * V.get(i, f));
+                        nV.add(i, f, Math.pow(gV.get(i, f), 2));
 
                         // update V
-                        if (Math.abs(zV.get(l, f)) <= lambda1) {
-                            V.set(l, f, 0);
+                        if (Math.abs(zV.get(i, f)) <= lambda1) {
+                            V.set(i, f, 0);
                         } else {
-                            double value = -1 / ((beta + Math.sqrt(nV.get(l, f))) / alpha + lambda2) * (zV.get(l, f) - sgn(zV.get(l, f)) * lambda1);
-                            V.set(l, f, value);
+                            double value = -1 / ((beta + Math.sqrt(nV.get(i, f))) / alpha + lambda2) * (zV.get(i, f) - sgn(zV.get(i, f)) * lambda1);
+                            V.set(i, f, value);
                         }
                     }
                 }

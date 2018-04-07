@@ -112,10 +112,13 @@ public abstract class FactorizationMachineRecommender extends AbstractRecommende
         trainTensor = (SparseTensor) getDataModel().getTrainDataSet();
         testTensor = (SparseTensor) getDataModel().getTestDataSet();
         validTensor = (SparseTensor) getDataModel().getValidDataSet();
+
         userMappingData = getDataModel().getUserMappingData();
         itemMappingData = getDataModel().getItemMappingData();
+
         numUsers = userMappingData.size();
         numItems = itemMappingData.size();
+
         globalMean = trainTensor.mean();
         maxRate = conf.getDouble("rec.recommender.maxrate", 12.0);
         minRate = conf.getDouble("rec.recommender.minrate", 0.0);
@@ -124,6 +127,7 @@ public abstract class FactorizationMachineRecommender extends AbstractRecommende
         for (int dim = 0; dim < trainTensor.numDimensions; dim++) {
             p += trainTensor.dimensions[dim]; // set the size of appender vectors
         }
+
         n = trainTensor.size(); // set the number of ratings
         numFactors = k = conf.getInt("rec.factor.number");
 
