@@ -460,13 +460,20 @@ public abstract class AbstractRecommender implements Recommender {
      * @throws LibrecException if error occurs
      */
     protected boolean isConverged(int iter) throws LibrecException{
-        float delta_loss = (float) (lastLoss - loss);
-
+        boolean converged = false;
+        float delta_loss = 0;
         // print out debug info
         if (verbose) {
-            String recName = getClass().getSimpleName().toString();
-            String info = recName + " iter " + iter + ": loss = " + loss + ", delta_loss = " + delta_loss;
-            LOG.info(info);
+            String recName = getClass().getSimpleName();
+            StringBuilder info = new StringBuilder(recName).append(" iter ").append(iter)
+                    .append(": loss = ").append(loss);
+
+            if (iter > 0) {
+                delta_loss = (float) (lastLoss - loss);
+                info.append(", delta_loss = ").append(delta_loss);
+                // check if converged
+            }
+            LOG.info(info.toString());
         }
 
         if (Double.isNaN(loss) || Double.isInfinite(loss)) {
@@ -474,8 +481,11 @@ public abstract class AbstractRecommender implements Recommender {
             throw new LibrecException("Loss = NaN or Infinity: current settings does not fit the recommender! Change the settings and try again!");
         }
 
-        // check if converged
-        boolean converged = Math.abs(delta_loss) < 1e-5;
+        lastLoss = loss;
+        if (iter > 0) {
+            converged = Math.abs(delta_loss) / loss < 5e-3;
+
+        }
 
         return converged;
     }

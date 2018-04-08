@@ -92,13 +92,12 @@ public class FFMRecommender extends FactorizationMachineRecommender {
 
                 double err = pred - rate;
                 loss += err * err;
-                double gradLoss = err;
 
                 // global bias
                 loss += regW0 * w0 * w0;
 
                 double hW0 = 1;
-                double gradW0 = gradLoss * hW0 + regW0 * w0;
+                double gradW0 = err * hW0 + regW0 * w0;
 
                 // update w0
                 w0 += -learnRate * gradW0;
@@ -109,7 +108,7 @@ public class FFMRecommender extends FactorizationMachineRecommender {
                         continue;
                     double oldWl = W.get(l);
                     double hWl = x.get(l);
-                    double gradWl = gradLoss * hWl + regW * oldWl;
+                    double gradWl = err * hWl + regW * oldWl;
                     W.add(l, -learnRate * gradWl);
 
                     loss += regW * oldWl * oldWl;
@@ -123,7 +122,7 @@ public class FFMRecommender extends FactorizationMachineRecommender {
                             if (j != l && x.contains(j))
                                 hVlf += xl * V.get(j, map.get(l) + f) * x.get(j);
                         }
-                        double gradVlf = gradLoss * hVlf + regF * oldVlf;
+                        double gradVlf = err * hVlf + regF * oldVlf;
                         V.add(l, map.get(l) + f, -learnRate * gradVlf);
                         loss += regF * oldVlf * oldVlf;
                     }
@@ -133,7 +132,7 @@ public class FFMRecommender extends FactorizationMachineRecommender {
 
             loss *= 0.5;
 
-            if (isConverged(iter)  && earlyStop)
+            if (isConverged(iter) && earlyStop)
                 break;
         }
     }
