@@ -26,7 +26,6 @@ import net.librec.math.structure.TensorEntry;
 import net.librec.math.structure.VectorEntry;
 import net.librec.recommender.FactorizationMachineRecommender;
 
-import java.io.FileDescriptor;
 import java.util.HashMap;
 
 /**
@@ -52,7 +51,7 @@ public class FFMRecommender extends FactorizationMachineRecommender {
     protected void setup() throws LibrecException {
         super.setup();
 
-        //Matrix for p * (factor * filed)
+        //Matrix for p * (nfactor * nfiled)
         V = new DenseMatrix(p, k * trainTensor.numDimensions);
         // init factors with small value
         V.init(0, 0.1);
@@ -115,19 +114,19 @@ public class FFMRecommender extends FactorizationMachineRecommender {
                     // 2-way interactions
                     for (int factor = 0; factor < k; factor++) {
                         int filed = map.get(l);
-                        double oldVlf = V.get(l, filed + factor);
+                        double oldVlf = V.get(l, k * filed + factor);
                         double hVlf = 0;
                         for(VectorEntry ve2: x){
                             int j = ve2.index();
                             double xj2 = ve2.get();
 
                             if (j != l) {
-                                hVlf += xj1 * V.get(j, filed + factor) * xj2;
+                                hVlf += xj1 * V.get(j, k * filed + factor) * xj2;
                             }
                         }
 
                         double gradVlf = err * hVlf + regF * oldVlf;
-                        V.add(l, filed + factor, -learnRate * gradVlf);
+                        V.add(l, k * filed + factor, -learnRate * gradVlf);
                         loss += regF * oldVlf * oldVlf;
                     }
 
@@ -155,7 +154,7 @@ public class FFMRecommender extends FactorizationMachineRecommender {
         }
 
         // 2-way interaction
-        for (int f = 0; f < k; f++) {
+        for (int factor = 0; factor < k; factor++) {
             double sum = 0;
             for (VectorEntry vi : x) {
                 for (VectorEntry vj : x) {
@@ -164,8 +163,8 @@ public class FFMRecommender extends FactorizationMachineRecommender {
                     int i = vi.index();
                     int j = vj.index();
                     if (i == j) continue;
-                    double vifj = V.get(i, map.get(j) + f);
-                    double vjfi = V.get(j, map.get(i) + f);
+                    double vifj = V.get(i, k * map.get(j) + factor);
+                    double vjfi = V.get(j, k * map.get(i) + factor);
                     sum += vifj * vjfi * xi * xj;
                 }
             }
