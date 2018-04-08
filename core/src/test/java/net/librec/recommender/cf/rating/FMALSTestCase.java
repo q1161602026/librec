@@ -55,12 +55,4 @@ public class FMALSTestCase extends BaseTestCase {
 		job.runJob();
 	}
 
-	@Test
-	public void testRecommenderWithGivenTestSet() throws ClassNotFoundException, LibrecException, IOException {
-		Resource resource = new Resource("rec/cf/rating/fmals-test.properties");
-		conf.addResource(resource);
-		RecommenderJob job = new RecommenderJob(conf);
-		job.runJob();
-	}
-
 }

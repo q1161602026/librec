@@ -44,7 +44,7 @@ public class FFMRecommender extends FactorizationMachineRecommender {
      */
     private double learnRate;
     /**
-     *  record the <feature: filed>
+     *  record the <feature: field>
      */
     private HashMap<Integer , Integer> map = new HashMap<Integer, Integer>();
 
@@ -78,11 +78,11 @@ public class FFMRecommender extends FactorizationMachineRecommender {
     }
 
     private void buildRatingModel() throws LibrecException {
+        int userDimension = trainTensor.getUserDimension();
+        int itemDimension = trainTensor.getItemDimension();
+
         for (int iter = 0; iter < numIterations; iter++) {
             loss = 0.0;
-
-            int userDimension = trainTensor.getUserDimension();
-            int itemDimension = trainTensor.getItemDimension();
             for (TensorEntry me : trainTensor) {
                 int[] entryKeys = me.keys();
                 SparseVector x = tenserKeysToFeatureVector(entryKeys);
@@ -103,27 +103,31 @@ public class FFMRecommender extends FactorizationMachineRecommender {
                 w0 += -learnRate * gradW0;
 
                 // 1-way interactions
-                for (int l = 0; l < p; l++) {
-                    if (!x.contains(l))
-                        continue;
+                for(VectorEntry ve: x){
+                    int l = ve.index();
                     double oldWl = W.get(l);
-                    double hWl = x.get(l);
-                    double gradWl = err * hWl + regW * oldWl;
+                    double xj1 = ve.get();
+                    double gradWl = err * xj1 + regW * oldWl;
                     W.add(l, -learnRate * gradWl);
 
                     loss += regW * oldWl * oldWl;
 
                     // 2-way interactions
-                    for (int f = 0; f < k; f++) {
-                        double oldVlf = V.get(l, map.get(l) + f);
+                    for (int factor = 0; factor < k; factor++) {
+                        int filed = map.get(l);
+                        double oldVlf = V.get(l, filed + factor);
                         double hVlf = 0;
-                        double xl = x.get(l);
-                        for (int j = 0; j < p; j++) {
-                            if (j != l && x.contains(j))
-                                hVlf += xl * V.get(j, map.get(l) + f) * x.get(j);
+                        for(VectorEntry ve2: x){
+                            int j = ve2.index();
+                            double xj2 = ve2.get();
+
+                            if (j != l) {
+                                hVlf += xj1 * V.get(j, filed + factor) * xj2;
+                            }
                         }
+
                         double gradVlf = err * hVlf + regF * oldVlf;
-                        V.add(l, map.get(l) + f, -learnRate * gradVlf);
+                        V.add(l, filed + factor, -learnRate * gradVlf);
                         loss += regF * oldVlf * oldVlf;
                     }
 

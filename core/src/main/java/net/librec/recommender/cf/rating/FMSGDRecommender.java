@@ -20,6 +20,7 @@ package net.librec.recommender.cf.rating;
 
 import net.librec.annotation.ModelData;
 import net.librec.common.LibrecException;
+import net.librec.math.structure.DenseMatrix;
 import net.librec.math.structure.SparseVector;
 import net.librec.math.structure.TensorEntry;
 import net.librec.math.structure.VectorEntry;
@@ -44,6 +45,11 @@ public class FMSGDRecommender extends FactorizationMachineRecommender {
     @Override
     protected void setup() throws LibrecException {
         super.setup();
+
+        // init factors with small value
+        V = new DenseMatrix(p, k);
+        V.init(0, 0.1);
+
         learnRate = conf.getDouble("rec.iterator.learnRate");
     }
 
@@ -59,7 +65,6 @@ public class FMSGDRecommender extends FactorizationMachineRecommender {
         int itemDimension = trainTensor.getItemDimension();
 
         for (int iter = 0; iter < numIterations; iter++) {
-            lastLoss = loss;
             loss = 0.0;
             for (TensorEntry me : trainTensor) {
                 int[] entryKeys = me.keys();
@@ -98,7 +103,7 @@ public class FMSGDRecommender extends FactorizationMachineRecommender {
                             int j = ve2.index();
                             double xj = ve2.get();
 
-                            if(j!=i){
+                            if (j!=i){
                                 hVif += xi * V.get(j, f) * xj;
                             }
                         }
@@ -113,7 +118,7 @@ public class FMSGDRecommender extends FactorizationMachineRecommender {
 
             loss *= 0.5;
 
-            if (isConverged(iter)  && earlyStop)
+            if (isConverged(iter) && earlyStop)
                 break;
         }
     }

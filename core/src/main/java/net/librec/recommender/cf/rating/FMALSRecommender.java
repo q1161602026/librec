@@ -47,6 +47,10 @@ public class FMALSRecommender extends FactorizationMachineRecommender {
     protected void setup() throws LibrecException {
         super.setup();
 
+        // init factors with small value
+        V = new DenseMatrix(p, k);
+        V.init(0, 0.1);
+
         // init Q
         Q = new DenseMatrix(n, k);
 
@@ -85,8 +89,8 @@ public class FMALSRecommender extends FactorizationMachineRecommender {
                 double sum_q = 0;
                 for (VectorEntry ve : x) {
                     int l = ve.index();
-                    double x_val = ve.get();
-                    sum_q += V.get(l, f) * x_val;
+                    double x_l = ve.get();
+                    sum_q += V.get(l, f) * x_l;
                 }
                 Q.set(ind, f, sum_q);
             }
@@ -101,7 +105,6 @@ public class FMALSRecommender extends FactorizationMachineRecommender {
          */
 
         for (int iter = 0; iter < numIterations; iter++) {
-            lastLoss = loss;
             loss = 0.0;
             // global bias
             double numerator = 0;

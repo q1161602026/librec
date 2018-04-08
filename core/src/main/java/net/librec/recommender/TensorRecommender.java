@@ -381,7 +381,7 @@ public abstract class TensorRecommender implements Recommender {
 
         lastLoss = loss;
         if (iter > 0) {
-            converged = Math.abs(delta_loss) / loss < 5e-3;
+            converged = Math.abs(delta_loss) / loss < 1e-5;
         }
 
         return converged;

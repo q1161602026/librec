@@ -74,7 +74,7 @@ public abstract class FactorizationMachineRecommender extends AbstractRecommende
     /**
      * parameter matrix
      */
-    protected DenseMatrix V; //  p x k
+    protected DenseMatrix V;
     /**
      * parameter matrix
      */
@@ -135,10 +135,6 @@ public abstract class FactorizationMachineRecommender extends AbstractRecommende
         w0 = 0;
         W = new DenseVector(p);
         W.init(0);
-
-        // init factors with small value
-        V = new DenseMatrix(p, k);
-        V.init(0, 0.1);
 
         regW0 = conf.getFloat("rec.fm.regw0", 0.01f);
         regW = conf.getFloat("rec.fm.regW", 0.01f);
