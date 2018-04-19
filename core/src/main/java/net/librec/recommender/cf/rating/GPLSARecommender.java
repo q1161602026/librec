@@ -35,7 +35,7 @@ import java.util.Map;
  * 2003. <br>
  * <p>
  * <strong>Tempered EM:</strong> Thomas Hofmann, <strong>Unsupervised Learning by Probabilistic Latent Semantic
- * Analysis</strong>, Machine Learning, 42, 177�C196, 2001.
+ * Analysis</strong>, Machine Learning, 42, 177-C196, 2001.
  */
 public class GPLSARecommender extends ProbabilisticGraphicalRecommender {
     /*
@@ -65,7 +65,7 @@ public class GPLSARecommender extends ProbabilisticGraphicalRecommender {
     /*
      * tempered EM parameter beta, suggested by Wu Bin
      */
-    protected float b;
+    protected float b = 0.0f;
     /*
      * small value for initialization
      */
@@ -251,8 +251,7 @@ public class GPLSARecommender extends ProbabilisticGraphicalRecommender {
         for (int z = 0; z < numTopics; z++) {
             sum += userTopicProbs.get(userIdx, z) * topicItemMu.get(itemIdx, z);
         }
-        double predictRating = userMu.get(userIdx) + userSigma.get(userIdx) * sum;
 
-        return predictRating;
+        return userMu.get(userIdx) + userSigma.get(userIdx) * sum;
     }
 }
